@@ -1,10 +1,13 @@
 import numpy
 
-def get_metrics(series, metrics_dict={
-                                      "basics": ["all"],
-                                      "polar": ["all"],
-                                      "fractal": ["all"]
-                                      },
+
+METRICS_DICT = {
+                "basics": ["all"],
+                "polar": ["all"],
+                "fractal": ["all"]}
+
+
+def get_metrics(series, metrics_dict=METRICS_DICT,
                                       nodata=-9999, show=False):
     """This function perform the computation and plot of the \
     spectral-polar-fractal metrics available in the stmetrics package.
@@ -37,14 +40,10 @@ def get_metrics(series, metrics_dict={
     return time_metrics
 
 
-def _getmetrics(timeseries):
-
-    metrics = {
-        "basics": ["all"],
-        "polar": ["all"],
-        "fractal": ["all"]
-        }
-
+def _getmetrics(args):
+    timeseries = args[0]
+    metrics = args[1]
+    
     out_metrics = get_metrics(timeseries, metrics, show=False)
 
     metricas = numpy.array([])
@@ -56,7 +55,7 @@ def _getmetrics(timeseries):
     return metricas
 
 
-def sits2metrics(dataset):
+def sits2metrics(dataset, metrics = METRICS_DICT):
     """This function performs the computation of the metrics using \
     multiprocessing.
 
@@ -83,7 +82,8 @@ def sits2metrics(dataset):
         print("Sorry we can't read this type of file.\
               Please use Rasterio, Numpy array or xarray.")
 
-def _sits2metrics(image):
+
+def _sits2metrics(image, metrics = METRICS_DICT):
     import multiprocessing as mp
     # Take our full image, ignore the Fmask band, and reshape into long \
     # 2d array (nrow * ncol, nband) for classification
@@ -94,7 +94,7 @@ def _sits2metrics(image):
     pool = mp.Pool(mp.cpu_count())
     # use pool to compute metrics for each pixel
     # return a list of arrays
-    X_m = pool.map(_getmetrics, [serie for serie in series])
+    X_m = pool.map(_getmetrics, [(serie, metrics) for serie in series])
     # close pool
     pool.close()
     # Conver list to numpy array
