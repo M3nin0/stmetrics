@@ -69,15 +69,14 @@ def sits2metrics(dataset, metrics = METRICS_DICT):
     import rasterio
     import xarray
 
-    
     if isinstance(dataset, rasterio.io.DatasetReader):
         image = dataset.read()
-        return _sits2metrics(image)
+        return _sits2metrics(image, metrics=metrics)
     elif isinstance(dataset, numpy.ndarray):
         image = dataset.copy()
-        return _sits2metrics(image)
+        return _sits2metrics(image, metrics=metrics)
     elif isinstance(dataset, xarray.Dataset):
-        return _compute_from_xarray(dataset)
+        return _compute_from_xarray(dataset, metrics=metrics)
     else:
         print("Sorry we can't read this type of file.\
               Please use Rasterio, Numpy array or xarray.")
@@ -107,7 +106,7 @@ def _sits2metrics(image, metrics = METRICS_DICT):
     return im_metrics
 
 
-def _compute_from_xarray(dataset):
+def _compute_from_xarray(dataset, metrics = METRICS_DICT):
     import xarray
     from . import utils
     
@@ -119,7 +118,7 @@ def _compute_from_xarray(dataset):
 
         series = numpy.squeeze(dataset[key].values)
 
-        metricas = _sits2metrics(series)
+        metricas = _sits2metrics(series, metrics=metrics)
         
         metrics_list = utils.list_metrics()
         
