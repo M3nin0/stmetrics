@@ -22,9 +22,11 @@ def fixseries(time_series, nodata=-9999):
     :return fixed_timeseries: Numpy array of time series without spikes.
     """
     check_input(time_series)
+    
+    shp = time_series.shape
 
     # Remove nodata on non masked arrays
-    if any(time_series[time_series == nodata]):
+    if (time_series[time_series == nodata]).any():
         time_series[time_series == nodata] = numpy.nan
     
     time_series = time_series[~numpy.isnan(time_series)]
@@ -45,7 +47,7 @@ def fixseries(time_series, nodata=-9999):
         time_series2[idx] = 0
 
     #force float as final array
-    return time_series2.astype(float)
+    return time_series2.reshape(shp).astype(float)
 
 
 def create_polygon(timeseries):
@@ -123,11 +125,11 @@ def check_input(timeseries):
     :raises ValueError: When ``timeseries`` is not valid.
     """
     if isinstance(timeseries, numpy.ndarray):
-        if len(timeseries) < 5:
+        if timeseries.shape[0] < 5:
             raise TypeError("Your time series is too short!")
-        elif all(numpy.isnan(timeseries)):
+        elif numpy.isnan(timeseries).all(): # all():
             raise Exception("Your time series has only nans!")
-        elif all(timeseries == 0):
+        elif (timeseries == 0).all():
             raise Exception("Your time series has only zeros!")
         else:
             return timeseries
@@ -251,4 +253,4 @@ def list_metrics():
 
 def truncate(n, decimals=6):
     multiplier = 10 ** decimals
-    return int(n * multiplier) / multiplier
+    return (n * multiplier).astype(int) / multiplier

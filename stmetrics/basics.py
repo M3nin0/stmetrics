@@ -58,10 +58,15 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
                 ]
     
     for f in funcs:
+        out_metrics[f] = eval(f)(timeseries, nodata)
+        
+        """
         try:
             out_metrics[f] = eval(f)(timeseries, nodata)
-        except:
+        except BaseException as e:
+            print(e)
             out_metrics[f] = numpy.nan
+        """
 
     return out_metrics
 
@@ -80,7 +85,7 @@ def mean_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(ts))
+    return utils.truncate(numpy.mean(ts, axis = 1))
 
 
 def max_ts(timeseries, nodata=-9999):
@@ -97,7 +102,7 @@ def max_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
     
-    return utils.truncate(numpy.max(ts))
+    return utils.truncate(numpy.max(ts, axis = 1))
 
 
 def min_ts(timeseries, nodata=-9999):
@@ -114,7 +119,7 @@ def min_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.min(ts))
+    return utils.truncate(numpy.min(ts, axis = 1))
 
 def std_ts(timeseries, nodata=-9999):
     """Std - Standard deviation of the cycle’s values.
@@ -131,7 +136,7 @@ def std_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.std(ts))
+    return utils.truncate(numpy.std(ts, axis = 1))
 
 
 def sum_ts(timeseries, nodata=-9999):
@@ -149,7 +154,7 @@ def sum_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.sum(ts))
+    return utils.truncate(numpy.sum(ts, axis = 1))
 
 
 def amplitude_ts(timeseries, nodata=-9999):
@@ -168,7 +173,7 @@ def amplitude_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.max(ts) - numpy.min(ts))
+    return utils.truncate(numpy.max(ts, axis = 1) - numpy.min(ts, axis = 1))
 
 
 def fslope_ts(timeseries, nodata=-9999):
@@ -188,7 +193,7 @@ def fslope_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.max(abs(numpy.diff(ts))))
+    return utils.truncate(numpy.max(abs(numpy.diff(ts, axis = 1)), axis = 1))
 
 def abs_sum_ts(timeseries, nodata=-9999):
     """Sum - Sum of values over a cycle.
@@ -206,7 +211,7 @@ def abs_sum_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.sum(numpy.abs(ts)))
+    return utils.truncate(numpy.sum(numpy.abs(ts), axis = 1))
 
 
 def skew_ts(timeseries, nodata=-9999):
@@ -224,7 +229,7 @@ def skew_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(stats.skew(ts))
+    return utils.truncate(stats.skew(ts, axis = 1))
 
 
 def amd_ts(timeseries, nodata=-9999):
@@ -243,7 +248,7 @@ def amd_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(numpy.abs(numpy.diff(ts))))
+    return utils.truncate(numpy.mean(numpy.abs(numpy.diff(ts, axis = 1)), axis = 1))
 
 
 def mse_ts(timeseries, nodata=-9999):
@@ -265,7 +270,7 @@ def mse_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts)))))
+    return utils.truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(ts, axis = 1))), axis = 1))
 
 
 def fqr_ts(timeseries, nodata=-9999):
@@ -284,7 +289,7 @@ def fqr_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 25, interpolation='midpoint'))
+    return utils.truncate(numpy.percentile(ts, 25, interpolation='midpoint', axis = 1))
 
 
 def tqr_ts(timeseries, nodata=-9999):
@@ -303,7 +308,7 @@ def tqr_ts(timeseries, nodata=-9999):
 
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 75, interpolation='midpoint'))
+    return utils.truncate(numpy.percentile(ts, 75, interpolation='midpoint', axis = 1))
 
 
 def sqr_ts(timeseries, nodata=-9999):
@@ -321,7 +326,7 @@ def sqr_ts(timeseries, nodata=-9999):
     """
     ts = utils.fixseries(timeseries, nodata)
 
-    return utils.truncate(numpy.percentile(ts, 50, interpolation='linear'))
+    return utils.truncate(numpy.percentile(ts, 50, interpolation='linear', axis = 1))
 
 
 def iqr_ts(timeseries, nodata=-9999):
@@ -340,8 +345,8 @@ def iqr_ts(timeseries, nodata=-9999):
     ts = utils.fixseries(timeseries, nodata)
 
     # interpolation is linear by deafult
-    q1 = numpy.percentile(ts, 25, interpolation='linear')
-    q3 = numpy.percentile(ts, 75, interpolation='linear')
+    q1 = numpy.percentile(ts, 25, interpolation='linear', axis = 1)
+    q3 = numpy.percentile(ts, 75, interpolation='linear', axis = 1)
 
     return utils.truncate(q3 - q1)
     

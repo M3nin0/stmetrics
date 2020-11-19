@@ -33,7 +33,7 @@ def get_metrics(series, metrics_dict=METRICS_DICT,
 
     if "polar" in metrics_dict:
         time_metrics["polar"] = polar.ts_polar(series, metrics_dict["polar"], nodata, show)
-    
+
     if "fractal" in metrics_dict:
             time_metrics["fractal"] = fractal.ts_fractal(series, metrics_dict["fractal"], nodata)
 
@@ -44,14 +44,16 @@ def _getmetrics(args):
     timeseries = args[0]
     metrics = args[1]
     
+    metricas = None
     out_metrics = get_metrics(timeseries, metrics, show=False)
 
-    metricas = numpy.array([])
-
-    for ki, vi in out_metrics.items():
-        for ki2, vi2 in vi.items():
-            metricas = numpy.append(metricas,vi2)
-
+    for key in out_metrics.keys():
+        _out = numpy.vstack([out_metrics[key][i] for i in out_metrics[key].keys()])
+        
+        if not metricas:
+            metricas = _out
+        else:
+            metricas = numpy.vstack((metricas, _out))
     return metricas
 
 
@@ -83,27 +85,15 @@ def sits2metrics(dataset, metrics = METRICS_DICT):
 
 
 def _sits2metrics(image, metrics = METRICS_DICT):
-    import multiprocessing as mp
     # Take our full image, ignore the Fmask band, and reshape into long \
     # 2d array (nrow * ncol, nband) for classification
     new_shape = (image.shape[1] * image.shape[2], image.shape[0])
     # Reshape array
     series = image[:, :, :].T.reshape(new_shape)
-    # Initialize pool
-    pool = mp.Pool(mp.cpu_count())
-    # use pool to compute metrics for each pixel
-    # return a list of arrays
-    X_m = pool.map(_getmetrics, [(serie, metrics) for serie in series])
-    # close pool
-    pool.close()
-    # Conver list to numpy array
-    metricas = numpy.vstack(X_m)
-    # Reshape to image shape
-    ma = [numpy.reshape(metricas[:, b], image[0, :, :].shape,
-                        order='F') for b in range(metricas.shape[1])]
-    im_metrics = numpy.rollaxis(numpy.dstack(ma), 2)
 
-    return im_metrics
+    metricas = _getmetrics((series, metrics))
+    
+    return metricas.reshape((metricas.shape[0], image.shape[1], image.shape[2]))
 
 
 def _compute_from_xarray(dataset, metrics = METRICS_DICT):
