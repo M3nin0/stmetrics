@@ -22,12 +22,11 @@ def fixseries(time_series, nodata=-9999):
     :return fixed_timeseries: Numpy array of time series without spikes.
     """
     check_input(time_series)
-    
     shp = time_series.shape
 
     # Remove nodata on non masked arrays
-    if (time_series[time_series == nodata]).any():
-        time_series[time_series == nodata] = numpy.nan
+    # if (time_series[time_series == nodata]).any():
+    #    time_series[time_series == nodata] = numpy.nan
     
     time_series = time_series[~numpy.isnan(time_series)]
 
