@@ -76,7 +76,8 @@ def mean_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.mean(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return (numpy.mean(timeseries, axis = 1) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -92,8 +93,8 @@ def max_ts(timeseries, nodata=-9999):
     :returns: Maximum value of time series.
     :rtype: numpy.float64
     """
-    
-    return truncate(numpy.max(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return (numpy.max(timeseries, axis = 1) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -109,8 +110,8 @@ def min_ts(timeseries, nodata=-9999):
     :returns: Minimum value of time series.
     :rtype: numpy.float64
     """
-
-    return truncate(numpy.min(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return (numpy.min(timeseries, axis = 1) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -126,8 +127,8 @@ def std_ts(timeseries, nodata=-9999):
     :returns: Standard deviation of time series.
     :rtype: numpy.float64
     """
-
-    return truncate(numpy.std(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return (numpy.std(timeseries, axis = 1) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -144,8 +145,8 @@ def sum_ts(timeseries, nodata=-9999):
     :returns: Sum of values of time series.
     :rtype: numpy.float64
     """
-
-    return truncate(numpy.sum(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return (numpy.sum(timeseries, axis = 1) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -163,7 +164,8 @@ def amplitude_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.max(timeseries, axis = 1) - numpy.min(timeseries, axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.max(timeseries, axis = 1) - numpy.min(timeseries, axis = 1)) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -182,7 +184,8 @@ def fslope_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.max(abs(numpy.diff(timeseries, axis = 1)), axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.max(abs(numpy.diff(timeseries, axis = 1)), axis = 1)) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -200,10 +203,10 @@ def abs_sum_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.sum(numpy.abs(timeseries), axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.sum(numpy.abs(timeseries), axis = 1)) * multiplier).astype(int) / multiplier
 
 
-@jit(nopython=True)
 def skew_ts(timeseries, nodata=-9999):
     """skew - Measures the asymmetry of the time series.
 
@@ -236,7 +239,8 @@ def amd_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.mean(numpy.abs(numpy.diff(timeseries, axis = 1)), axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.mean(numpy.abs(numpy.diff(timeseries, axis = 1)), axis = 1)) * multiplier).astype(int) / multiplier
 
 
 def mse_ts(timeseries, nodata=-9999):
@@ -274,7 +278,8 @@ def fqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.percentile(timeseries, 25, interpolation='midpoint', axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.percentile(timeseries, 25, interpolation='midpoint', axis = 1)) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -292,7 +297,8 @@ def tqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.percentile(timeseries, 75, interpolation='midpoint', axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.percentile(timeseries, 75, interpolation='midpoint', axis = 1)) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -310,7 +316,8 @@ def sqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(numpy.percentile(timeseries, 50, interpolation='linear', axis = 1))
+    multiplier = 10 ** 6
+    return ((numpy.percentile(timeseries, 50, interpolation='linear', axis = 1)) * multiplier).astype(int) / multiplier
 
 
 @jit(nopython=True)
@@ -332,5 +339,5 @@ def iqr_ts(timeseries, nodata=-9999):
     q1 = numpy.percentile(timeseries, 25, interpolation='linear', axis = 1)
     q3 = numpy.percentile(timeseries, 75, interpolation='linear', axis = 1)
 
-    return truncate(q3 - q1)
-    
+    multiplier = 10 ** 6
+    return ((q3 - q1) * multiplier).astype(int) / multiplier
