@@ -1,8 +1,6 @@
 import numpy
 from scipy import stats
-from numba import jit
-
-from .utils import truncate, error_basics, fixseries
+from . import utils
 
 
 def ts_basics(timeseries, funcs=["all"], nodata=-9999):
@@ -34,6 +32,7 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
     :returns: Dictionary of basic metrics
     :rtype: dictionary
     """
+    from .utils import error_basics
 
     out_metrics = dict()
 
@@ -56,13 +55,21 @@ def ts_basics(timeseries, funcs=["all"], nodata=-9999):
                 'sqr_ts'
                 ]
     
-    timeseries = fixseries(timeseries, nodata)
+    timeseries = utils.fixseries(timeseries, nodata)
     for f in funcs:
         out_metrics[f] = eval(f)(timeseries, nodata)
+        
+        """
+        try:
+            out_metrics[f] = eval(f)(timeseries, nodata)
+        except BaseException as e:
+            print(e)
+            out_metrics[f] = numpy.nan
+        """
+
     return out_metrics
 
 
-@jit(nopython=True)
 def mean_ts(timeseries, nodata=-9999):
     """Mean - Average value of the curve along one cycle.
 
@@ -76,11 +83,9 @@ def mean_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return (numpy.mean(timeseries, axis = 1) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.mean(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def max_ts(timeseries, nodata=-9999):
     """ Max - Maximum value of the cycle.
 
@@ -93,11 +98,10 @@ def max_ts(timeseries, nodata=-9999):
     :returns: Maximum value of time series.
     :rtype: numpy.float64
     """
-    multiplier = 10 ** 6
-    return (numpy.max(timeseries, axis = 1) * multiplier).astype(int) / multiplier
+    
+    return utils.truncate(numpy.max(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def min_ts(timeseries, nodata=-9999):
     """Min - Minimum value of the curve along one cycle.
 
@@ -110,11 +114,10 @@ def min_ts(timeseries, nodata=-9999):
     :returns: Minimum value of time series.
     :rtype: numpy.float64
     """
-    multiplier = 10 ** 6
-    return (numpy.min(timeseries, axis = 1) * multiplier).astype(int) / multiplier
+
+    return utils.truncate(numpy.min(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def std_ts(timeseries, nodata=-9999):
     """Std - Standard deviation of the cycle’s values.
 
@@ -127,11 +130,10 @@ def std_ts(timeseries, nodata=-9999):
     :returns: Standard deviation of time series.
     :rtype: numpy.float64
     """
-    multiplier = 10 ** 6
-    return (numpy.std(timeseries, axis = 1) * multiplier).astype(int) / multiplier
+
+    return utils.truncate(numpy.std(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def sum_ts(timeseries, nodata=-9999):
     """Sum - Sum of values over a cycle.
     Usually is an indicator of the annual production of vegetation.
@@ -145,11 +147,10 @@ def sum_ts(timeseries, nodata=-9999):
     :returns: Sum of values of time series.
     :rtype: numpy.float64
     """
-    multiplier = 10 ** 6
-    return (numpy.sum(timeseries, axis = 1) * multiplier).astype(int) / multiplier
+
+    return utils.truncate(numpy.sum(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def amplitude_ts(timeseries, nodata=-9999):
     """Amplitude - The difference between the cycle’s maximum and minimum \
     values.
@@ -164,11 +165,9 @@ def amplitude_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.max(timeseries, axis = 1) - numpy.min(timeseries, axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.max(timeseries, axis = 1) - numpy.min(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def fslope_ts(timeseries, nodata=-9999):
 
     """First_slope - Maximum value of the first slope of the cycle.
@@ -184,11 +183,9 @@ def fslope_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.max(abs(numpy.diff(timeseries, axis = 1)), axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.max(abs(numpy.diff(timeseries, axis = 1)), axis = 1))
 
 
-@jit(nopython=True)
 def abs_sum_ts(timeseries, nodata=-9999):
     """Sum - Sum of values over a cycle.
     Usually is an indicator of the annual production of vegetation.
@@ -203,8 +200,7 @@ def abs_sum_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.sum(numpy.abs(timeseries), axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.sum(numpy.abs(timeseries), axis = 1))
 
 
 def skew_ts(timeseries, nodata=-9999):
@@ -220,10 +216,9 @@ def skew_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    return truncate(stats.skew(timeseries, axis = 1))
+    return utils.truncate(stats.skew(timeseries, axis = 1))
 
 
-@jit(nopython=True)
 def amd_ts(timeseries, nodata=-9999):
     """amd - Absolute mean derivative (AMD)
     It provides information on the growth rate of vegetation, allowing \
@@ -239,8 +234,7 @@ def amd_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.mean(numpy.abs(numpy.diff(timeseries, axis = 1)), axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.mean(numpy.abs(numpy.diff(timeseries, axis = 1)), axis = 1))
 
 
 def mse_ts(timeseries, nodata=-9999):
@@ -260,10 +254,9 @@ def mse_ts(timeseries, nodata=-9999):
         This function was adapted from sglearn package.
     """
 
-    return truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(timeseries, axis = 1))), axis = 1))
+    return utils.truncate(numpy.mean(numpy.square(numpy.abs(numpy.fft.fft(timeseries, axis = 1))), axis = 1))
 
 
-@jit(nopython=True)
 def fqr_ts(timeseries, nodata=-9999):
     """fqr - Mean Spectral Energy
     It computes the first quartileof a time series.
@@ -278,11 +271,9 @@ def fqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.percentile(timeseries, 25, interpolation='midpoint', axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.percentile(timeseries, 25, interpolation='midpoint', axis = 1))
 
 
-@jit(nopython=True)
 def tqr_ts(timeseries, nodata=-9999):
     """tqr - First quartile
     It computes the third quartileof a time series.
@@ -297,11 +288,9 @@ def tqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.percentile(timeseries, 75, interpolation='midpoint', axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.percentile(timeseries, 75, interpolation='midpoint', axis = 1))
 
 
-@jit(nopython=True)
 def sqr_ts(timeseries, nodata=-9999):
     """sqr - Interquaritle range (IQR)
     It computes the interquaritle range of the time series.
@@ -316,11 +305,9 @@ def sqr_ts(timeseries, nodata=-9999):
     :rtype: numpy.float64
     """
 
-    multiplier = 10 ** 6
-    return ((numpy.percentile(timeseries, 50, interpolation='linear', axis = 1)) * multiplier).astype(int) / multiplier
+    return utils.truncate(numpy.percentile(timeseries, 50, interpolation='linear', axis = 1))
 
 
-@jit(nopython=True)
 def iqr_ts(timeseries, nodata=-9999):
     """iqr - Interquaritle range (IQR).
     It computes the interquaritle range of the time series.
@@ -339,5 +326,5 @@ def iqr_ts(timeseries, nodata=-9999):
     q1 = numpy.percentile(timeseries, 25, interpolation='linear', axis = 1)
     q3 = numpy.percentile(timeseries, 75, interpolation='linear', axis = 1)
 
-    multiplier = 10 ** 6
-    return ((q3 - q1) * multiplier).astype(int) / multiplier
+    return utils.truncate(q3 - q1)
+    
